@@ -11,16 +11,15 @@ export default function TabLayout() {
           backgroundColor: Colors.surfaceContainerLow,
           borderTopColor: 'rgba(255,255,255,0.08)',
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
+          paddingTop: 8,
         },
         tabBarActiveTintColor: Colors.primaryContainer,
         tabBarInactiveTintColor: Colors.onSurfaceVariant,
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: '600',
-          letterSpacing: 0.5,
           textTransform: 'uppercase',
+          paddingBottom: 4,
         },
       }}>
       <Tabs.Screen

@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.xl,
     gap: Spacing.cardGap,
-    paddingBottom: Spacing.xxxl,
+    paddingBottom: Spacing.md,
   },
   activeBanner: {
     flexDirection: 'row',
