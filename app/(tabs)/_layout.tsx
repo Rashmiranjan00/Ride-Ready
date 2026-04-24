@@ -1,33 +1,83 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Zap, Navigation, BarChart3, Fuel, Settings } from 'lucide-react-native';
+import { Colors } from '@shared/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: Colors.surfaceContainerLow,
+          borderTopColor: 'rgba(255,255,255,0.08)',
+          borderTopWidth: 1,
+          height: 60,
+          paddingBottom: 8,
+        },
+        tabBarActiveTintColor: Colors.primaryContainer,
+        tabBarInactiveTintColor: Colors.onSurfaceVariant,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Dashboard',
+          tabBarIcon: ({ color }) => (
+            <Zap size={20} color={color} opacity={color === Colors.primaryContainer ? 1 : 0.5} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="ride"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Ride',
+          tabBarIcon: ({ color }) => (
+            <Navigation
+              size={20}
+              color={color}
+              opacity={color === Colors.primaryContainer ? 1 : 0.5}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="summary"
+        options={{
+          title: 'Summary',
+          tabBarIcon: ({ color }) => (
+            <BarChart3
+              size={20}
+              color={color}
+              opacity={color === Colors.primaryContainer ? 1 : 0.5}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="fuel"
+        options={{
+          title: 'Fuel',
+          tabBarIcon: ({ color }) => (
+            <Fuel size={20} color={color} opacity={color === Colors.primaryContainer ? 1 : 0.5} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <Settings
+              size={20}
+              color={color}
+              opacity={color === Colors.primaryContainer ? 1 : 0.5}
+            />
+          ),
         }}
       />
     </Tabs>
