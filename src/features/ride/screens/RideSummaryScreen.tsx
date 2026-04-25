@@ -50,7 +50,7 @@ export default function RideSummaryScreen() {
       : `${(lastRide.distance * 0.621371).toFixed(1)} mi`;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.appTitle}>TRIP SUMMARY</Text>
       </View>
@@ -118,7 +118,12 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.xl, gap: Spacing.cardGap, paddingBottom: 60 },
   heroCard: { alignItems: 'center', paddingVertical: Spacing.xxxl, gap: Spacing.sm },
   metricLabel: { ...Typography.labelCaps, color: Colors.onSurfaceVariant },
-  heroValue: { ...Typography.metricLarge, color: Colors.primaryContainer, fontSize: 56 },
+  heroValue: { 
+    ...Typography.metricLarge, 
+    color: Colors.primaryContainer, 
+    fontSize: 56,
+    lineHeight: 64,
+  },
   durationText: { ...Typography.bodyLg, color: Colors.onSurfaceVariant, fontSize: 16 },
   breakdownCard: { gap: Spacing.md },
   sectionTitle: {

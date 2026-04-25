@@ -69,7 +69,10 @@ export default function RideActiveScreen() {
 
       <View style={styles.cockpit}>
         {/* Time elapsed — hero metric */}
-        <GlassCard style={styles.heroCard} glowAccent>
+        <GlassCard style={[styles.heroCard, { width: '100%', overflow: 'hidden' }]} glowAccent>
+          <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+            <View style={styles.ambientGlow} />
+          </View>
           <Text style={styles.metricLabel}>TIME ELAPSED</Text>
           <Text style={styles.heroValue}>{formatDuration(elapsed)}</Text>
         </GlassCard>
@@ -94,8 +97,6 @@ export default function RideActiveScreen() {
         />
       </View>
 
-      {/* Background ambient glow */}
-      <View style={styles.ambientGlow} pointerEvents="none" />
     </SafeAreaView>
   );
 }
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     alignItems: 'center',
-    paddingVertical: Spacing.xxxl,
+    paddingVertical: 80, // Increased to fit the larger background circle
   },
   metricLabel: {
     ...Typography.labelCaps,
@@ -166,10 +167,11 @@ const styles = StyleSheet.create({
   heroValue: {
     ...Typography.displayHero,
     color: Colors.primaryContainer,
-    // Glow effect via shadow
     textShadowColor: Colors.primaryContainer,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
+    paddingHorizontal: 20, // Prevents horizontal clipping of shadow
+    paddingVertical: 10,   // Prevents vertical clipping of shadow
   },
   distanceCard: {
     alignItems: 'center',
@@ -197,16 +199,10 @@ const styles = StyleSheet.create({
     height: 80,
   },
   ambientGlow: {
-    position: 'absolute',
-    top: '40%',
-    left: '50%',
-    width: 300,
-    height: 300,
-    marginLeft: -150,
-    marginTop: -150,
-    borderRadius: 150,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
     backgroundColor: Colors.primaryContainer,
-    opacity: 0.03,
-    // Platform-specific blur workaround via opacity
+    opacity: 0.1,
   },
 });

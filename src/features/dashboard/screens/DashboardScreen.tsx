@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Modal } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
-import { Gauge } from 'lucide-react-native';
-import { WeatherCard } from '../components/WeatherCard';
-import { FuelCard } from '../components/FuelCard';
-import { Checklist } from '../components/Checklist';
+import { useFuelStore } from '@features/fuel/store/fuelStore';
+import { startLocationTracking } from '@features/ride/services/locationService';
+import { useRideStore } from '@features/ride/store/rideStore';
+import { useSettingsStore } from '@features/settings/store/settingsStore';
+import { useWeather } from '@features/weather/hooks/useWeather';
 import { PrimaryButton } from '@shared/components/PrimaryButton';
 import { StatusStrip } from '@shared/components/StatusStrip';
-import { useWeather } from '@features/weather/hooks/useWeather';
-import { useFuelStore } from '@features/fuel/store/fuelStore';
-import { useSettingsStore } from '@features/settings/store/settingsStore';
-import { useRideStore } from '@features/ride/store/rideStore';
-import { startLocationTracking } from '@features/ride/services/locationService';
-import { Colors, Typography, Spacing } from '@shared/theme';
+import { Colors, Spacing, Typography } from '@shared/theme';
+import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
+import { Gauge } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Checklist } from '../components/Checklist';
+import { FuelCard } from '../components/FuelCard';
+import { WeatherCard } from '../components/WeatherCard';
 
 export default function DashboardScreen() {
   const { data: weather, loading: weatherLoading, error: weatherError } = useWeather();
@@ -46,7 +46,7 @@ export default function DashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.appTitle}>RIDEREADY</Text>
