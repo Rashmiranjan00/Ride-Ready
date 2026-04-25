@@ -107,32 +107,36 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ data, loading, error }
 
   return (
     <GlassCard style={styles.card} glowAccent={meta.rideable}>
-      {/* Header row */}
+      {/* Header section (Conditions + Icon) */}
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerTextCol}>
           <Text style={styles.labelCaps}>CONDITIONS</Text>
-          <Text style={styles.cityName}>{data.cityName}</Text>
+          <View style={styles.tempRow}>
+            <Text style={styles.temp}>{data.temp}°</Text>
+            <Text style={styles.tempUnit}>C</Text>
+          </View>
+          <Text style={styles.rideText}>{meta.rideLabel}</Text>
         </View>
         <WeatherIcon size={48} color={meta.color} />
       </View>
 
-      {/* Temp + ride label */}
-      <View style={styles.tempRow}>
-        <Text style={styles.temp}>{data.temp}°</Text>
-        <View style={styles.rideLabel}>
-          <View
-            style={[
-              styles.rideIndicator,
-              {
-                backgroundColor: meta.rideable ? Colors.secondaryContainer : Colors.errorContainer,
-              },
-            ]}
-          />
-          <Text style={styles.rideText}>{meta.rideLabel}</Text>
-        </View>
+      {/* Hourly Forecast Mock Row */}
+      <View style={styles.forecastRow}>
+        {[
+          { time: 'Now', temp: data.temp, icon: meta.Icon },
+          { time: '1 hr', temp: data.temp + 1, icon: meta.Icon },
+          { time: '2 hr', temp: data.temp + 1, icon: Cloud },
+          { time: '3 hr', temp: data.temp - 1, icon: Cloud },
+        ].map((item, i) => (
+          <View key={i} style={styles.forecastItem}>
+            <Text style={styles.forecastTime}>{item.time}</Text>
+            <item.icon size={20} color={meta.color} />
+            <Text style={styles.forecastTemp}>{item.temp}°</Text>
+          </View>
+        ))}
       </View>
 
-      {/* Detail row */}
+      {/* Detail row (Feels, Humidity, Wind) */}
       <View style={styles.detailRow}>
         <DetailChip label="FEELS" value={`${data.feelsLike}°`} />
         <DetailChip label="HUMIDITY" value={`${data.humidity}%`} />
@@ -158,46 +162,60 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  headerTextCol: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
   labelCaps: {
     ...Typography.labelCaps,
     color: Colors.onSurfaceVariant,
-    marginBottom: 2,
-  },
-  cityName: {
-    ...Typography.headlineMd,
-    color: Colors.onSurface,
-    fontSize: 16,
-    lineHeight: 20,
+    marginBottom: 8,
   },
   tempRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: 4,
+    marginBottom: 4,
   },
   temp: {
     ...Typography.metricLarge,
+    color: Colors.primaryContainer,
+    lineHeight: 52, // adjust for visual alignment
+  },
+  tempUnit: {
+    ...Typography.bodyLg,
     color: Colors.onSurface,
-  },
-  rideLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  rideIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    paddingBottom: 6,
   },
   rideText: {
     ...Typography.labelSm,
     color: Colors.onSurfaceVariant,
-    maxWidth: 140,
-    flexShrink: 1,
+  },
+  forecastRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingTop: Spacing.md,
+  },
+  forecastItem: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  forecastTime: {
+    ...Typography.labelSm,
+    color: Colors.onSurfaceVariant,
+  },
+  forecastTemp: {
+    ...Typography.labelSm,
+    color: Colors.onSurface,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: Spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingTop: Spacing.md,
   },
   chip: {
     alignItems: 'center',

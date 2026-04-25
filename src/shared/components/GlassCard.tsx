@@ -23,17 +23,12 @@ export const GlassCard: React.FC<GlassCardProps> = ({ children, style, glowAccen
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'rgba(19, 19, 19, 0.7)',
+    backgroundColor: 'rgba(42, 42, 42, 0.4)',
     borderRadius: BorderRadius.lg,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     borderLeftColor: 'rgba(255, 255, 255, 0.1)',
-    // Right and bottom are separate to avoid full border override
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.04)',
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
     padding: Spacing.lg,
     overflow: 'hidden',
   },

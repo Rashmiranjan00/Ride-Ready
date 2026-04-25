@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Check } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GlassCard } from '@shared/components/GlassCard';
@@ -17,9 +16,7 @@ function getTodayKey(): string {
 }
 
 /**
- * Checklist — 4 pre-ride items with tap-to-toggle.
- * State resets daily (each new day starts fresh).
- * Provides haptic feedback on toggle.
+ * Checklist — 4 pre-ride items with a custom toggle switch matching the Stitch design.
  */
 export const Checklist: React.FC = () => {
   const [checked, setChecked] = useState<ChecklistState>({});
@@ -33,7 +30,6 @@ export const Checklist: React.FC = () => {
       const savedDate = await AsyncStorage.getItem(TODAY_KEY);
       const today = getTodayKey();
       if (savedDate !== today) {
-        // New day — reset checklist
         await AsyncStorage.setItem(TODAY_KEY, today);
         await AsyncStorage.removeItem(STORAGE_KEY);
         setChecked({});
@@ -53,35 +49,36 @@ export const Checklist: React.FC = () => {
     );
   }
 
-  const allChecked = CHECKLIST_ITEMS.every((item) => checked[item.id]);
-
   return (
     <GlassCard style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.labelCaps}>PRE-RIDE CHECKLIST</Text>
-        {allChecked && <Text style={styles.allGood}>✓ ALL CLEAR</Text>}
-      </View>
+      <Text style={styles.labelCaps}>PRE-RIDE CHECKS</Text>
 
       <View style={styles.items}>
-        {CHECKLIST_ITEMS.map((item) => {
-          const isChecked = !!checked[item.id];
-          return (
-            <TouchableOpacity
-              key={item.id}
-              activeOpacity={0.7}
-              onPress={() => toggle(item.id)}
-              style={[styles.item, isChecked && styles.itemChecked]}>
-              <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
-                {isChecked && <Check size={14} color={Colors.onSecondary} strokeWidth={3} />}
-              </View>
-              <Text style={[styles.itemLabel, isChecked && styles.itemLabelChecked]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        {CHECKLIST_ITEMS.map((item) => (
+          <ChecklistItem
+            key={item.id}
+            label={item.label}
+            isChecked={!!checked[item.id]}
+            onToggle={() => toggle(item.id)}
+          />
+        ))}
       </View>
     </GlassCard>
+  );
+};
+
+const ChecklistItem: React.FC<{ label: string; isChecked: boolean; onToggle: () => void }> = ({
+  label,
+  isChecked,
+  onToggle,
+}) => {
+  return (
+    <TouchableOpacity activeOpacity={0.7} onPress={onToggle} style={styles.item}>
+      <Text style={[styles.itemLabel, isChecked && styles.itemLabelChecked]}>{label}</Text>
+      <View style={[styles.toggleTrack, isChecked && styles.toggleTrackChecked]}>
+        <View style={[styles.toggleThumb, isChecked && styles.toggleThumbChecked]} />
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -89,67 +86,61 @@ const styles = StyleSheet.create({
   card: {
     gap: Spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   labelCaps: {
     ...Typography.labelCaps,
     color: Colors.onSurfaceVariant,
-  },
-  allGood: {
-    ...Typography.labelCaps,
-    color: Colors.secondaryContainer,
-    fontSize: 10,
+    marginBottom: Spacing.xs,
   },
   items: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     gap: Spacing.sm,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.sm,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    minHeight: Spacing.xxxl,
-  },
-  itemChecked: {
-    borderColor: Colors.secondaryContainer,
-    backgroundColor: Colors.secondaryContainer + '18',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: Colors.outline,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: Colors.secondaryContainer,
-    borderColor: Colors.secondaryContainer,
-  },
-  checkmark: {
-    color: Colors.onSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 14,
+    borderColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.02)', // surface-container/50 roughly
   },
   itemLabel: {
-    ...Typography.labelSm,
-    color: Colors.onSurfaceVariant,
-    fontSize: 13,
-    fontWeight: '500',
+    ...Typography.bodyLg,
+    color: Colors.onSurface,
+    fontSize: 16,
   },
   itemLabelChecked: {
-    color: Colors.secondaryContainer,
+    color: Colors.primaryContainer,
+  },
+  toggleTrack: {
+    width: 48,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceContainerHighest,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  toggleTrackChecked: {
+    backgroundColor: 'rgba(0, 240, 255, 0.2)', // primary-container/20
+    borderColor: 'rgba(0, 240, 255, 0.4)',
+  },
+  toggleThumb: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.onSurfaceVariant,
+  },
+  toggleThumbChecked: {
+    backgroundColor: Colors.primaryContainer,
+    transform: [{ translateX: 24 }],
+    shadowColor: Colors.primaryContainer,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

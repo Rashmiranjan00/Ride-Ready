@@ -84,11 +84,7 @@ export default function RideSummaryScreen() {
             router.replace('/(tabs)');
           }}
         />
-        <PrimaryButton
-          label="Add Fuel"
-          onPress={() => router.push('/(tabs)/fuel')}
-          variant="ghost"
-        />
+        <PrimaryButton label="Add Fuel" onPress={() => router.push('/fuel')} variant="ghost" />
       </ScrollView>
     </SafeAreaView>
   );

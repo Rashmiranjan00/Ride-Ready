@@ -3,7 +3,7 @@
 
 export const Colors = {
   // Backgrounds
-  background: '#131313',
+  background: '#0A0A0A',
   surface: '#131313',
   surfaceDim: '#131313',
   surfaceBright: '#3a3939',

@@ -1,92 +1,161 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Fuel, DollarSign, Ruler, Check, Banknote } from 'lucide-react-native';
 import { GlassCard } from '@shared/components/GlassCard';
+import { PrimaryButton } from '@shared/components/PrimaryButton';
 import { useSettingsStore } from '@features/settings/store/settingsStore';
-import { Colors, Typography, Spacing } from '@shared/theme';
+import { Colors, Typography, Spacing, BorderRadius } from '@shared/theme';
 
 export default function SettingsScreen() {
   const { prefs, updatePrefs } = useSettingsStore();
+  const [localAvgMileage, setLocalAvgMileage] = useState(prefs.avgMileage.toString());
+  const [localFuelPrice, setLocalFuelPrice] = useState(prefs.fuelPrice.toString());
+
+  const handleSave = () => {
+    updatePrefs({
+      avgMileage: parseFloat(localAvgMileage) || prefs.avgMileage,
+      fuelPrice: parseFloat(localFuelPrice) || prefs.fuelPrice,
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.appTitle}>SETTINGS</Text>
+        <Text style={styles.appTitle}>RIDEREADY</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <GlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>BIKE SETUP</Text>
-          <SettingRow
-            label="Avg. Mileage"
-            value={`${prefs.avgMileage} km/L`}
-            onInc={() => updatePrefs({ avgMileage: prefs.avgMileage + 1 })}
-            onDec={() => updatePrefs({ avgMileage: Math.max(1, prefs.avgMileage - 1) })}
-          />
-          <View style={styles.divider} />
-          <SettingRow
-            label="Fuel Price"
-            value={`₹${prefs.fuelPrice}/L`}
-            onInc={() => updatePrefs({ fuelPrice: prefs.fuelPrice + 1 })}
-            onDec={() => updatePrefs({ fuelPrice: Math.max(1, prefs.fuelPrice - 1) })}
-          />
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>Preferences</Text>
+          <Text style={styles.pageSubtitle}>
+            Configure your telemetry and trip calculation metrics.
+          </Text>
+        </View>
+
+        {/* Mileage Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <Fuel size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Set Average Mileage</Text>
+              <Text style={styles.settingDesc}>Used for trip range estimates.</Text>
+            </View>
+          </View>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              keyboardType="decimal-pad"
+              value={localAvgMileage}
+              onChangeText={setLocalAvgMileage}
+            />
+            <Text style={styles.unitText}>{prefs.distanceUnit === 'km' ? 'km/L' : 'MPG'}</Text>
+          </View>
         </GlassCard>
 
-        <GlassCard style={styles.section}>
-          <Text style={styles.sectionTitle}>PREFERENCES</Text>
-          <View style={styles.switchRow}>
-            <View>
-              <Text style={styles.switchLabel}>Distance Unit</Text>
-              <Text style={styles.switchSub}>
-                Currently: {prefs.distanceUnit === 'km' ? 'Kilometres' : 'Miles'}
+        {/* Fuel Price Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <DollarSign size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Set Fuel Price</Text>
+              <Text style={styles.settingDesc}>Calculate trip costs accurately.</Text>
+            </View>
+          </View>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.currencySymbol}>{prefs.currency === 'USD' ? '$' : '₹'}</Text>
+            <TextInput
+              style={[styles.input, { paddingLeft: 24 }]}
+              keyboardType="decimal-pad"
+              value={localFuelPrice}
+              onChangeText={setLocalFuelPrice}
+            />
+          </View>
+        </GlassCard>
+
+        {/* Currency Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <Banknote size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Currency</Text>
+              <Text style={styles.settingDesc}>Select your preferred currency.</Text>
+            </View>
+          </View>
+          <View style={styles.segmentedControl}>
+            <TouchableOpacity
+              style={[styles.segmentBtn, prefs.currency === 'INR' && styles.segmentBtnActive]}
+              onPress={() => updatePrefs({ currency: 'INR' })}>
+              <Text
+                style={[styles.segmentText, prefs.currency === 'INR' && styles.segmentTextActive]}>
+                INR (₹)
               </Text>
-            </View>
-            <Switch
-              value={prefs.distanceUnit === 'mi'}
-              onValueChange={(v) => updatePrefs({ distanceUnit: v ? 'mi' : 'km' })}
-              trackColor={{ false: Colors.outlineVariant, true: Colors.primaryContainer }}
-              thumbColor={Colors.onSurface}
-            />
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.switchRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.switchLabel}>Always Start Tracking</Text>
-              <Text style={styles.switchSub}>Skip confirmation when opening Maps</Text>
-            </View>
-            <Switch
-              value={prefs.alwaysStartTracking}
-              onValueChange={(v) => updatePrefs({ alwaysStartTracking: v })}
-              trackColor={{ false: Colors.outlineVariant, true: Colors.primaryContainer }}
-              thumbColor={Colors.onSurface}
-            />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.segmentBtn, prefs.currency === 'USD' && styles.segmentBtnActive]}
+              onPress={() => updatePrefs({ currency: 'USD' })}>
+              <Text
+                style={[styles.segmentText, prefs.currency === 'USD' && styles.segmentTextActive]}>
+                USD ($)
+              </Text>
+            </TouchableOpacity>
           </View>
         </GlassCard>
 
-        <Text style={styles.version}>RideReady v1.0.0</Text>
+        {/* Units Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <Ruler size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Units</Text>
+              <Text style={styles.settingDesc}>Select your preferred measurement system.</Text>
+            </View>
+          </View>
+          <View style={styles.segmentedControl}>
+            <TouchableOpacity
+              style={[styles.segmentBtn, prefs.distanceUnit === 'km' && styles.segmentBtnActive]}
+              onPress={() => updatePrefs({ distanceUnit: 'km' })}>
+              <Text
+                style={[
+                  styles.segmentText,
+                  prefs.distanceUnit === 'km' && styles.segmentTextActive,
+                ]}>
+                km/L
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.segmentBtn, prefs.distanceUnit === 'mi' && styles.segmentBtnActive]}
+              onPress={() => updatePrefs({ distanceUnit: 'mi' })}>
+              <Text
+                style={[
+                  styles.segmentText,
+                  prefs.distanceUnit === 'mi' && styles.segmentTextActive,
+                ]}>
+                MPG
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </GlassCard>
+
+        <View style={styles.saveAction}>
+          <PrimaryButton
+            icon={<Check size={20} color={Colors.onPrimaryContainer} />}
+            label="Save Preferences"
+            onPress={handleSave}
+            style={styles.saveBtn}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const SettingRow: React.FC<{
-  label: string;
-  value: string;
-  onInc: () => void;
-  onDec: () => void;
-}> = ({ label, value, onInc, onDec }) => (
-  <View style={styles.settingRow}>
-    <Text style={styles.settingLabel}>{label}</Text>
-    <View style={styles.stepper}>
-      <TouchableOpacity style={styles.stepBtn} onPress={onDec}>
-        <Text style={styles.stepBtnText}>−</Text>
-      </TouchableOpacity>
-      <Text style={styles.settingValue}>{value}</Text>
-      <TouchableOpacity style={styles.stepBtn} onPress={onInc}>
-        <Text style={styles.stepBtnText}>+</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -102,52 +171,114 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     fontWeight: '700',
   },
-  content: { padding: Spacing.xl, gap: Spacing.cardGap, paddingBottom: 60 },
-  section: { gap: Spacing.md },
-  sectionTitle: {
-    ...Typography.labelCaps,
-    color: Colors.onSurfaceVariant,
-    marginBottom: Spacing.xs,
+  content: { padding: Spacing.xl, gap: Spacing.cardGap, paddingBottom: 100 },
+  pageHeader: {
+    marginBottom: Spacing.md,
   },
-  divider: { height: 1, backgroundColor: Colors.outlineVariant, marginVertical: Spacing.xs },
-  settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  settingLabel: { ...Typography.bodyLg, color: Colors.onSurface, fontSize: 15 },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  stepBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.surfaceContainerHigh,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-  },
-  stepBtnText: {
-    ...Typography.headlineMd,
-    color: Colors.primaryContainer,
-    fontSize: 20,
-    lineHeight: 24,
-  },
-  settingValue: {
+  pageTitle: {
     ...Typography.headlineMd,
     color: Colors.onSurface,
-    fontSize: 15,
-    minWidth: 80,
-    textAlign: 'center',
+    marginBottom: 4,
   },
-  switchRow: {
+  pageSubtitle: {
+    ...Typography.bodyLg,
+    color: Colors.onSurfaceVariant,
+  },
+  settingCard: {
+    flexDirection: 'column',
+    gap: Spacing.md,
+    padding: Spacing.xl,
+  },
+  cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     gap: Spacing.md,
   },
-  switchLabel: { ...Typography.bodyLg, color: Colors.onSurface, fontSize: 15 },
-  switchSub: { ...Typography.labelSm, color: Colors.onSurfaceVariant, fontSize: 12, marginTop: 2 },
-  version: {
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textWrapper: {
+    flex: 1,
+  },
+  settingTitle: {
+    ...Typography.bodyLg,
+    color: Colors.onSurface,
+    fontWeight: '500',
+  },
+  settingDesc: {
     ...Typography.labelSm,
     color: Colors.onSurfaceVariant,
-    textAlign: 'center',
-    marginTop: Spacing.xl,
+    marginTop: 4,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    position: 'relative',
+  },
+  input: {
+    flex: 1,
+    height: 48,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderTopLeftRadius: BorderRadius.sm,
+    borderTopRightRadius: BorderRadius.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineVariant,
+    paddingHorizontal: Spacing.md,
+    fontFamily: Typography.metricLarge.fontFamily,
+    fontWeight: '600',
+    fontSize: 24,
+    lineHeight: 28,
+    color: Colors.primaryContainer,
+    textAlign: 'right',
+  },
+  unitText: {
+    ...Typography.labelCaps,
+    color: Colors.onSurfaceVariant,
+    width: 48,
+  },
+  currencySymbol: {
+    position: 'absolute',
+    left: Spacing.md,
+    fontFamily: Typography.metricLarge.fontFamily,
+    fontWeight: '600',
+    fontSize: 24,
+    lineHeight: 28,
+    color: Colors.onSurfaceVariant,
+    zIndex: 1,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: BorderRadius.lg,
+    padding: 4,
+    height: 48,
+  },
+  segmentBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BorderRadius.sm,
+  },
+  segmentBtnActive: {
+    backgroundColor: 'rgba(0, 240, 255, 0.2)', // primaryContainer/20
+  },
+  segmentText: {
+    ...Typography.labelCaps,
+    color: Colors.onSurfaceVariant,
+  },
+  segmentTextActive: {
+    color: Colors.primaryContainer,
+  },
+  saveAction: {
+    marginTop: Spacing.lg,
+  },
+  saveBtn: {
+    height: 56,
   },
 });

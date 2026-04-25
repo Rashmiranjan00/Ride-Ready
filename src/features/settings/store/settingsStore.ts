@@ -15,6 +15,7 @@ const defaultPrefs: UserPrefs = {
   fuelPrice: DEFAULT_FUEL_PRICE,
   distanceUnit: 'km',
   alwaysStartTracking: false,
+  currency: 'INR',
 };
 
 export const useSettingsStore = create<SettingsState>()(

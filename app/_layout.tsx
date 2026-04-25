@@ -56,6 +56,8 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="ride" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="fuel" options={{ headerShown: false, presentation: 'modal' }} />
       </Stack>
     </GestureHandlerRootView>
   );

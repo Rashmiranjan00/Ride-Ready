@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Modal } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Settings } from 'lucide-react-native';
+import { Gauge } from 'lucide-react-native';
 import { WeatherCard } from '../components/WeatherCard';
 import { FuelCard } from '../components/FuelCard';
 import { Checklist } from '../components/Checklist';
@@ -50,11 +50,6 @@ export default function DashboardScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.appTitle}>RIDEREADY</Text>
-        <TouchableOpacity
-          style={styles.settingsBtn}
-          onPress={() => router.push('/(tabs)/settings')}>
-          <Settings size={20} color={Colors.onSurfaceVariant} />
-        </TouchableOpacity>
       </View>
 
       <StatusStrip gpsActive={isRideActive} />
@@ -62,7 +57,7 @@ export default function DashboardScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Active ride banner */}
         {isRideActive && (
-          <TouchableOpacity style={styles.activeBanner} onPress={() => router.push('/(tabs)/ride')}>
+          <TouchableOpacity style={styles.activeBanner} onPress={() => router.push('/ride')}>
             <View style={styles.activeDot} />
             <Text style={styles.activeBannerText}>Ride in progress — tap to view</Text>
           </TouchableOpacity>
@@ -79,8 +74,9 @@ export default function DashboardScreen() {
 
         <View style={styles.ctaRow}>
           <PrimaryButton
-            label={isRideActive ? 'Continue Ride' : 'Start Ride'}
-            onPress={isRideActive ? () => router.push('/(tabs)/ride') : handleStartRide}
+            icon={<Gauge size={20} color={Colors.onPrimaryContainer} />}
+            label={isRideActive ? 'Continue Ride' : 'Start Ride (Open Maps)'}
+            onPress={isRideActive ? () => router.push('/ride') : handleStartRide}
             style={styles.cta}
           />
         </View>

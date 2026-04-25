@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
+import { Fuel } from 'lucide-react-native';
 import { GlassCard } from '@shared/components/GlassCard';
 import { Colors, Typography, Spacing } from '@shared/theme';
 
@@ -12,129 +14,137 @@ interface FuelCardProps {
 
 /**
  * FuelCard — shows estimated range based on last known fuel + avg mileage.
- * Green glow when range > 50km, yellow warning < 20km.
+ * Features a circular SVG gauge matching the Stitch design.
  */
-export const FuelCard: React.FC<FuelCardProps> = ({
-  estimatedRangeKm,
-  lastFuelAmountRs,
-  avgMileage,
-  fuelPrice,
-}) => {
-  const rangeColor =
-    estimatedRangeKm > 50
-      ? Colors.secondaryContainer
-      : estimatedRangeKm > 20
-        ? '#FFC107'
-        : Colors.error;
+export const FuelCard: React.FC<FuelCardProps> = ({ estimatedRangeKm }) => {
+  // Assuming ~200km is a full tank for visual gauge purposes
+  const maxRange = 200;
+  const levelPercent = Math.min(Math.max((estimatedRangeKm / maxRange) * 100, 0), 100);
 
-  const rangeLabel =
-    estimatedRangeKm > 50 ? 'Good to go' : estimatedRangeKm > 20 ? 'Getting low' : 'Refuel soon';
+  const rangeColor = Colors.secondaryFixed || Colors.secondaryContainer;
+
+  // SVG Gauge calculations
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  // Make it a 3/4 circle (270 degrees)
+  const strokeDasharray = `${circumference * 0.75} ${circumference}`;
+  const strokeDashoffset = circumference * 0.75 * (1 - levelPercent / 100);
 
   return (
     <GlassCard style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.labelCaps}>FUEL / RANGE</Text>
-        <View style={[styles.statusPill, { backgroundColor: rangeColor + '22' }]}>
-          <View style={[styles.dot, { backgroundColor: rangeColor }]} />
-          <Text style={[styles.statusText, { color: rangeColor }]}>{rangeLabel}</Text>
+      <View style={styles.leftCol}>
+        <View style={styles.iconWrapper}>
+          <Fuel size={20} color={rangeColor} />
+        </View>
+        <Text style={styles.labelCaps}>EST. RANGE</Text>
+        <View style={styles.metricRow}>
+          <Text style={[styles.rangeValue, { color: rangeColor }]}>
+            ~{estimatedRangeKm > 0 ? Math.round(estimatedRangeKm) : '0'}
+          </Text>
+          <Text style={styles.rangeUnit}>km</Text>
         </View>
       </View>
 
-      <View style={styles.metricRow}>
-        <View>
-          <Text style={[styles.rangeValue, { color: rangeColor }]}>
-            {estimatedRangeKm > 0 ? `${Math.round(estimatedRangeKm)}` : '—'}
-          </Text>
-          <Text style={styles.rangeUnit}>km est. range</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.details}>
-          <DetailRow label="AVG MILEAGE" value={`${avgMileage} km/L`} />
-          <DetailRow label="FUEL PRICE" value={`₹${fuelPrice}/L`} />
-          {lastFuelAmountRs != null && (
-            <DetailRow label="LAST FILL" value={`₹${lastFuelAmountRs}`} />
-          )}
+      <View style={styles.gaugeContainer}>
+        <Svg width={112} height={112} viewBox="0 0 100 100" style={styles.svg}>
+          {/* Background Track */}
+          <Circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="transparent"
+            stroke="rgba(255, 255, 255, 0.05)"
+            strokeWidth={8}
+            strokeDasharray={strokeDasharray}
+            strokeLinecap="round"
+          />
+          {/* Active Track */}
+          <Circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="transparent"
+            stroke={rangeColor}
+            strokeWidth={8}
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+          />
+        </Svg>
+        <View style={styles.gaugeTextContainer}>
+          <Text style={styles.gaugeLabel}>Level</Text>
+          <Text style={styles.gaugePercent}>{Math.round(levelPercent)}%</Text>
         </View>
       </View>
     </GlassCard>
   );
 };
 
-const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <View style={styles.detailRow}>
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   card: {
-    gap: Spacing.md,
-  },
-  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    padding: Spacing.xl,
+  },
+  leftCol: {
+    flexDirection: 'column',
+    gap: 8,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(121, 255, 91, 0.1)', // secondary-fixed/10
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   labelCaps: {
     ...Typography.labelCaps,
     color: Colors.onSurfaceVariant,
   },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 99,
-    gap: 5,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  statusText: {
-    ...Typography.labelSm,
-    fontWeight: '600',
-  },
   metricRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
+    alignItems: 'baseline',
+    gap: 4,
   },
   rangeValue: {
     ...Typography.metricLarge,
-    lineHeight: 52,
+    textShadowColor: 'rgba(121, 255, 91, 0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
   rangeUnit: {
-    ...Typography.labelSm,
-    color: Colors.onSurfaceVariant,
-    marginTop: 2,
-  },
-  divider: {
-    width: 1,
-    height: 56,
-    backgroundColor: Colors.outlineVariant,
-  },
-  details: {
-    flex: 1,
-    gap: Spacing.xs,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  detailLabel: {
-    ...Typography.labelCaps,
-    color: Colors.onSurfaceVariant,
-    fontSize: 10,
-  },
-  detailValue: {
-    ...Typography.labelSm,
+    ...Typography.bodyLg,
     color: Colors.onSurface,
-    fontSize: 13,
+  },
+  gaugeContainer: {
+    position: 'relative',
+    width: 112,
+    height: 112,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  svg: {
+    transform: [{ rotate: '135deg' }], // Rotate to start from bottom-left
+  },
+  gaugeTextContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 8,
+  },
+  gaugeLabel: {
+    ...Typography.labelSm,
+    color: Colors.onSurfaceVariant,
+  },
+  gaugePercent: {
+    ...Typography.headlineMd,
+    color: Colors.onSurface,
   },
 });

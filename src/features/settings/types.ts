@@ -3,4 +3,5 @@ export type UserPrefs = {
   fuelPrice: number; // ₹ per litre
   distanceUnit: 'km' | 'mi';
   alwaysStartTracking: boolean; // Skip "Start Ride" confirmation modal
+  currency: 'INR' | 'USD';
 };

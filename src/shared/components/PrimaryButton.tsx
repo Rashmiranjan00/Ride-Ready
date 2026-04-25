@@ -6,6 +6,7 @@ import {
   ViewStyle,
   StyleProp,
   ActivityIndicator,
+  View,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius } from '@shared/theme';
 
@@ -17,6 +18,7 @@ interface PrimaryButtonProps {
   /** 'primary' = neon cyan | 'danger' = red glow | 'ghost' = outline only */
   variant?: 'primary' | 'danger' | 'ghost';
   style?: StyleProp<ViewStyle>;
+  icon?: React.ReactNode;
 }
 
 /**
@@ -31,6 +33,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   disabled = false,
   variant = 'primary',
   style,
+  icon,
 }) => {
   return (
     <TouchableOpacity
@@ -51,14 +54,17 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
           size="small"
         />
       ) : (
-        <Text
-          style={[
-            styles.label,
-            variant === 'ghost' && styles.ghostLabel,
-            variant === 'danger' && styles.dangerLabel,
-          ]}>
-          {label.toUpperCase()}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {icon && <View>{icon}</View>}
+          <Text
+            style={[
+              styles.label,
+              variant === 'ghost' && styles.ghostLabel,
+              variant === 'danger' && styles.dangerLabel,
+            ]}>
+            {label.toUpperCase()}
+          </Text>
+        </View>
       )}
     </TouchableOpacity>
   );
