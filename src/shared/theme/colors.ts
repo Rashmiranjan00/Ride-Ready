@@ -63,6 +63,10 @@ export const Colors = {
   errorContainer: '#93000a',
   onError: '#690005',
   onErrorContainer: '#ffdad6',
+
+  // Warning
+  warning: '#ffb700',
+  warningContainer: '#4d3700',
 } as const;
 
 export type ColorToken = keyof typeof Colors;

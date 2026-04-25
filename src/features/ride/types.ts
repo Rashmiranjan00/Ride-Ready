@@ -9,7 +9,7 @@ export type Ride = {
   costPerKm: number; // ₹/km
 };
 
-export type RideStatus = 'idle' | 'active' | 'ending';
+export type RideStatus = 'idle' | 'active' | 'paused' | 'ending';
 
 export type RideSession = {
   startTime: number;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Fuel, DollarSign, Ruler, Check, Banknote } from 'lucide-react-native';
+import { Fuel, DollarSign, Ruler, Check, Banknote, Navigation, Clock } from 'lucide-react-native';
 import { GlassCard } from '@shared/components/GlassCard';
 import { PrimaryButton } from '@shared/components/PrimaryButton';
 import { useSettingsStore } from '@features/settings/store/settingsStore';
@@ -11,11 +11,17 @@ export default function SettingsScreen() {
   const { prefs, updatePrefs } = useSettingsStore();
   const [localAvgMileage, setLocalAvgMileage] = useState(prefs.avgMileage.toString());
   const [localFuelPrice, setLocalFuelPrice] = useState(prefs.fuelPrice.toString());
+  const [localBaseFare, setLocalBaseFare] = useState(prefs.baseFare.toString());
+  const [localCostPerKm, setLocalCostPerKm] = useState(prefs.costPerKm.toString());
+  const [localCostPerMin, setLocalCostPerMin] = useState(prefs.costPerMin.toString());
 
   const handleSave = () => {
     updatePrefs({
       avgMileage: parseFloat(localAvgMileage) || prefs.avgMileage,
       fuelPrice: parseFloat(localFuelPrice) || prefs.fuelPrice,
+      baseFare: parseFloat(localBaseFare) || 0,
+      costPerKm: parseFloat(localCostPerKm) || 0,
+      costPerMin: parseFloat(localCostPerMin) || 0,
     });
   };
 
@@ -72,6 +78,82 @@ export default function SettingsScreen() {
               keyboardType="decimal-pad"
               value={localFuelPrice}
               onChangeText={setLocalFuelPrice}
+            />
+          </View>
+        </GlassCard>
+
+        {/* Intelligence Settings Header */}
+        <View style={{ marginTop: Spacing.md, marginBottom: Spacing.sm }}>
+          <Text style={styles.pageTitle}>Intelligence Settings</Text>
+          <Text style={styles.pageSubtitle}>
+            Configure base fare and rates for real-time cost intelligence.
+          </Text>
+        </View>
+
+        {/* Base Fare Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <DollarSign size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Base Fare</Text>
+              <Text style={styles.settingDesc}>Starting cost before distance/time.</Text>
+            </View>
+          </View>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.currencySymbol}>{prefs.currency === 'USD' ? '$' : '₹'}</Text>
+            <TextInput
+              style={[styles.input, { paddingLeft: 24 }]}
+              keyboardType="decimal-pad"
+              value={localBaseFare}
+              onChangeText={setLocalBaseFare}
+            />
+          </View>
+        </GlassCard>
+
+        {/* Cost Per Km Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <Navigation size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Cost per Unit Distance</Text>
+              <Text style={styles.settingDesc}>
+                Charge per {prefs.distanceUnit === 'km' ? 'kilometer' : 'mile'}.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.currencySymbol}>{prefs.currency === 'USD' ? '$' : '₹'}</Text>
+            <TextInput
+              style={[styles.input, { paddingLeft: 24 }]}
+              keyboardType="decimal-pad"
+              value={localCostPerKm}
+              onChangeText={setLocalCostPerKm}
+            />
+          </View>
+        </GlassCard>
+
+        {/* Cost Per Minute Card */}
+        <GlassCard style={styles.settingCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconWrapper}>
+              <Clock size={24} color={Colors.primaryContainer} />
+            </View>
+            <View style={styles.textWrapper}>
+              <Text style={styles.settingTitle}>Cost per Minute</Text>
+              <Text style={styles.settingDesc}>Charge for elapsed ride time.</Text>
+            </View>
+          </View>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.currencySymbol}>{prefs.currency === 'USD' ? '$' : '₹'}</Text>
+            <TextInput
+              style={[styles.input, { paddingLeft: 24 }]}
+              keyboardType="decimal-pad"
+              value={localCostPerMin}
+              onChangeText={setLocalCostPerMin}
             />
           </View>
         </GlassCard>

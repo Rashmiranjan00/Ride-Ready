@@ -17,12 +17,16 @@ interface RideState {
   status: RideStatus;
   isActive: boolean;
   startTime: number | null;
+  pauseTime: number | null;
   distance: number; // in meters
   lastPoint: LocationPoint | null;
+  route: LocationPoint[];
   lastRide: Ride | null;
   rideHistory: Ride[];
 
   startRide: () => void;
+  pauseRide: () => void;
+  resumeRide: () => void;
   stopRide: (avgMileage: number, fuelPrice: number) => Ride | null;
   addLocationPoint: (point: LocationPoint) => void;
   setHistory: (rides: Ride[]) => void;
@@ -37,8 +41,10 @@ export const useRideStore = create<RideState>()(
       status: 'idle',
       isActive: false,
       startTime: null,
+      pauseTime: null,
       distance: 0,
       lastPoint: null,
+      route: [],
       lastRide: null,
       rideHistory: [],
       session: null,
@@ -50,8 +56,10 @@ export const useRideStore = create<RideState>()(
           status: 'active',
           isActive: true,
           startTime: now,
+          pauseTime: null,
           distance: 0,
           lastPoint: null,
+          route: [],
           session: {
             startTime: now,
             currentDistance: 0,
@@ -62,8 +70,8 @@ export const useRideStore = create<RideState>()(
       },
 
       addLocationPoint: (point) => {
-        const { isActive, lastPoint, distance, session } = get();
-        if (!isActive) return;
+        const { isActive, status, lastPoint, distance, session, route } = get();
+        if (!isActive || status === 'paused') return;
 
         // Filter bad accuracy (>30m)
         if (point.accuracy && point.accuracy > 30) {
@@ -90,9 +98,17 @@ export const useRideStore = create<RideState>()(
           }
         }
 
+        let newRoute = route;
+        const lastRoutePoint = route[route.length - 1];
+        // Store point if route is empty or 3 seconds have passed since last stored point
+        if (!lastRoutePoint || point.timestamp - lastRoutePoint.timestamp > 3000) {
+          newRoute = [...route, point];
+        }
+
         set({
           lastPoint: point,
           distance: newDistance,
+          route: newRoute,
           // Sync legacy session for now
           session: session
             ? {
@@ -103,6 +119,27 @@ export const useRideStore = create<RideState>()(
               }
             : null,
         });
+      },
+
+      pauseRide: () => {
+        const { isActive, status } = get();
+        if (isActive && status === 'active') {
+          set({ status: 'paused', pauseTime: Date.now() });
+          logger.info('Ride paused');
+        }
+      },
+
+      resumeRide: () => {
+        const { isActive, status, pauseTime, startTime } = get();
+        if (isActive && status === 'paused' && pauseTime && startTime) {
+          const pausedDuration = Date.now() - pauseTime;
+          set({
+            status: 'active',
+            pauseTime: null,
+            startTime: startTime + pausedDuration,
+          });
+          logger.info('Ride resumed', { pausedDuration });
+        }
       },
 
       stopRide: (avgMileage, fuelPrice) => {
@@ -130,8 +167,10 @@ export const useRideStore = create<RideState>()(
           status: 'idle',
           isActive: false,
           startTime: null,
+          pauseTime: null,
           distance: 0,
           lastPoint: null,
+          route: [],
           session: null,
           lastRide: ride, // Legacy field
           rideHistory: [ride, ...state.rideHistory],
@@ -149,8 +188,10 @@ export const useRideStore = create<RideState>()(
         // Only persist the necessary fields for resuming
         isActive: state.isActive,
         startTime: state.startTime,
+        pauseTime: state.pauseTime,
         distance: state.distance,
         lastPoint: state.lastPoint,
+        route: state.route,
         rideHistory: state.rideHistory,
         session: state.session, // Legacy
         status: state.status, // Legacy

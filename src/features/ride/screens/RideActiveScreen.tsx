@@ -6,9 +6,8 @@ import * as Haptics from 'expo-haptics';
 import { PrimaryButton } from '@shared/components/PrimaryButton';
 import { GlassCard } from '@shared/components/GlassCard';
 import { Satellite, MapPin, Zap } from 'lucide-react-native';
-import { useRideTracking } from '../hooks/useRideTracking';
-import { useRideStore } from '../store/rideStore';
-import { useTimer } from '../hooks/useTimer';
+import { useRideIntelligence } from '../hooks/useRideIntelligence';
+import { useSettingsStore } from '@features/settings/store/settingsStore';
 import { Colors, Typography, Spacing } from '@shared/theme';
 
 function formatDuration(ms: number): string {
@@ -22,22 +21,22 @@ function formatDuration(ms: number): string {
 }
 
 export default function RideActiveScreen() {
-  const { stopRide } = useRideTracking();
-  const { isActive, startTime, distance } = useRideStore();
-  const elapsed = useTimer(startTime);
+  const { stopRide, pauseRide, resumeRide, isActive, status, cost, distance, durationMs } =
+    useRideIntelligence();
+  const { prefs } = useSettingsStore();
 
   useEffect(() => {
-    if (!isActive || !startTime) {
+    if (!isActive) {
       router.replace('/(tabs)');
       return;
     }
-  }, [isActive, startTime]);
+  }, [isActive]);
 
   async function handleEndRide() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     const ride = await stopRide();
     if (ride) {
-      router.replace('/(modals)/ride-summary');
+      router.replace('/ride-summary');
     } else {
       router.replace('/(tabs)');
     }
@@ -48,9 +47,20 @@ export default function RideActiveScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.appTitle}>RIDEREADY</Text>
-        <View style={styles.livePill}>
-          <View style={styles.liveDot} />
-          <Text style={styles.liveText}>LIVE</Text>
+        <View
+          style={[
+            styles.livePill,
+            status === 'paused' && {
+              backgroundColor: Colors.warningContainer + '33',
+              borderColor: Colors.warning + '66',
+            },
+          ]}>
+          <View
+            style={[styles.liveDot, status === 'paused' && { backgroundColor: Colors.warning }]}
+          />
+          <Text style={[styles.liveText, status === 'paused' && { color: Colors.warning }]}>
+            {status === 'paused' ? 'PAUSED' : 'LIVE'}
+          </Text>
         </View>
       </View>
 
@@ -70,21 +80,42 @@ export default function RideActiveScreen() {
             <View style={styles.ambientGlow} />
           </View>
           <Text style={styles.metricLabel}>TIME ELAPSED</Text>
-          <Text style={styles.heroValue}>{formatDuration(elapsed)}</Text>
+          <Text style={styles.heroValue}>{formatDuration(durationMs)}</Text>
         </GlassCard>
 
-        {/* Distance */}
-        <GlassCard style={styles.distanceCard}>
-          <Text style={styles.metricLabel}>DISTANCE</Text>
-          <View style={styles.distanceRow}>
-            <Text style={styles.metricValue}>{(distance / 1000).toFixed(1)}</Text>
-            <Text style={styles.metricUnit}>KM</Text>
-          </View>
-        </GlassCard>
+        {/* Distance and Cost */}
+        <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+          <GlassCard style={[styles.distanceCard, { flex: 1 }]}>
+            <Text style={styles.metricLabel}>DISTANCE</Text>
+            <View style={styles.distanceRow}>
+              <Text style={styles.metricValue}>{(distance / 1000).toFixed(1)}</Text>
+              <Text style={styles.metricUnit}>{prefs.distanceUnit === 'km' ? 'KM' : 'MI'}</Text>
+            </View>
+          </GlassCard>
+
+          <GlassCard style={[styles.distanceCard, { flex: 1 }]}>
+            <Text style={styles.metricLabel}>EST. COST</Text>
+            <View style={styles.distanceRow}>
+              <Text style={styles.metricUnit}>{prefs.currency === 'USD' ? '$' : '₹'}</Text>
+              <Text style={styles.metricValue}>{cost.toFixed(2)}</Text>
+            </View>
+          </GlassCard>
+        </View>
       </View>
 
-      {/* End Ride */}
+      {/* Actions */}
       <View style={styles.actionArea}>
+        <View style={{ flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.md }}>
+          {status === 'active' ? (
+            <PrimaryButton
+              label="Pause Ride"
+              onPress={() => pauseRide()}
+              style={{ flex: 1, backgroundColor: Colors.surfaceContainerHigh }}
+            />
+          ) : (
+            <PrimaryButton label="Resume Ride" onPress={() => resumeRide()} style={{ flex: 1 }} />
+          )}
+        </View>
         <PrimaryButton
           label="End Ride"
           onPress={handleEndRide}

@@ -57,6 +57,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="ride" options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="ride-summary" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="fuel" options={{ headerShown: false, presentation: 'modal' }} />
       </Stack>
     </GestureHandlerRootView>

@@ -4,4 +4,7 @@ export type UserPrefs = {
   distanceUnit: 'km' | 'mi';
   alwaysStartTracking: boolean; // Skip "Start Ride" confirmation modal
   currency: 'INR' | 'USD';
+  baseFare: number;
+  costPerKm: number;
+  costPerMin: number;
 };

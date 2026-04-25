@@ -14,13 +14,13 @@ import { useFuelStore } from '@features/fuel/store/fuelStore';
 import { Checklist } from '../components/Checklist';
 import { FuelCard } from '../components/FuelCard';
 import { WeatherCard } from '../components/WeatherCard';
-import { useRideTracking } from '@features/ride/hooks/useRideTracking';
+import { useRideIntelligence } from '@features/ride/hooks/useRideIntelligence';
 
 export default function DashboardScreen() {
   const { data: weather, loading: weatherLoading, error: weatherError } = useWeather();
   const { prefs } = useSettingsStore();
   const fuelStore = useFuelStore();
-  const { startRide } = useRideTracking();
+  const { startRide } = useRideIntelligence();
   const { status: rideStatus } = useRideStore();
   const [showStartModal, setShowStartModal] = useState(false);
 

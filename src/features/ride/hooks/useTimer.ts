@@ -4,12 +4,17 @@ import { useState, useEffect } from 'react';
  * A hook that strictly derives elapsed duration from a given startTime.
  * It uses setInterval merely as a tick mechanism to trigger React re-renders.
  */
-export function useTimer(startTime: number | null) {
+export function useTimer(startTime: number | null, pauseTime: number | null = null) {
   const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     if (!startTime) {
       setDuration(0);
+      return;
+    }
+
+    if (pauseTime) {
+      setDuration(pauseTime - startTime);
       return;
     }
 
@@ -21,7 +26,7 @@ export function useTimer(startTime: number | null) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, [startTime, pauseTime]);
 
   return duration;
 }

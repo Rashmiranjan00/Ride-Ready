@@ -16,6 +16,9 @@ const defaultPrefs: UserPrefs = {
   distanceUnit: 'km',
   alwaysStartTracking: false,
   currency: 'INR',
+  baseFare: 0,
+  costPerKm: 0,
+  costPerMin: 0,
 };
 
 export const useSettingsStore = create<SettingsState>()(
