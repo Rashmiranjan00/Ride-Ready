@@ -70,7 +70,9 @@ export default function RideActiveScreen() {
       <View style={styles.cockpit}>
         {/* Time elapsed — hero metric */}
         <GlassCard style={[styles.heroCard, { width: '100%', overflow: 'hidden' }]} glowAccent>
-          <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]} pointerEvents="none">
+          <View
+            style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}
+            pointerEvents="none">
             <View style={styles.ambientGlow} />
           </View>
           <Text style={styles.metricLabel}>TIME ELAPSED</Text>
@@ -96,7 +98,6 @@ export default function RideActiveScreen() {
           style={styles.endBtn}
         />
       </View>
-
     </SafeAreaView>
   );
 }
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
     paddingHorizontal: 20, // Prevents horizontal clipping of shadow
-    paddingVertical: 10,   // Prevents vertical clipping of shadow
+    paddingVertical: 10, // Prevents vertical clipping of shadow
   },
   distanceCard: {
     alignItems: 'center',

@@ -118,9 +118,9 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.xl, gap: Spacing.cardGap, paddingBottom: 60 },
   heroCard: { alignItems: 'center', paddingVertical: Spacing.xxxl, gap: Spacing.sm },
   metricLabel: { ...Typography.labelCaps, color: Colors.onSurfaceVariant },
-  heroValue: { 
-    ...Typography.metricLarge, 
-    color: Colors.primaryContainer, 
+  heroValue: {
+    ...Typography.metricLarge,
+    color: Colors.primaryContainer,
     fontSize: 56,
     lineHeight: 64,
   },
