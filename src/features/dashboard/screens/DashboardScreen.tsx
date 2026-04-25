@@ -1,5 +1,3 @@
-import { useFuelStore } from '@features/fuel/store/fuelStore';
-import { startLocationTracking } from '@features/ride/services/locationService';
 import { useRideStore } from '@features/ride/store/rideStore';
 import { useSettingsStore } from '@features/settings/store/settingsStore';
 import { useWeather } from '@features/weather/hooks/useWeather';
@@ -12,15 +10,18 @@ import { Gauge } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFuelStore } from '@features/fuel/store/fuelStore';
 import { Checklist } from '../components/Checklist';
 import { FuelCard } from '../components/FuelCard';
 import { WeatherCard } from '../components/WeatherCard';
+import { useRideTracking } from '@features/ride/hooks/useRideTracking';
 
 export default function DashboardScreen() {
   const { data: weather, loading: weatherLoading, error: weatherError } = useWeather();
   const { prefs } = useSettingsStore();
   const fuelStore = useFuelStore();
-  const { startRide, status: rideStatus } = useRideStore();
+  const { startRide } = useRideTracking();
+  const { status: rideStatus } = useRideStore();
   const [showStartModal, setShowStartModal] = useState(false);
 
   const estimatedRange = fuelStore.estimatedRange(prefs.fuelPrice, prefs.avgMileage);
@@ -40,7 +41,7 @@ export default function DashboardScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     if (withTracking) {
       startRide();
-      await startLocationTracking();
+      // Tracking is now handled entirely within the startRide hook
     }
     Linking.openURL('https://www.google.com/maps/dir/?api=1');
   }

@@ -20,6 +20,19 @@ export function haversineDistanceKm(
   return R * c;
 }
 
+/**
+ * Haversine formula — calculates great-circle distance between two GPS coords.
+ * Returns distance in meters.
+ */
+export function haversineDistanceMeters(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  return haversineDistanceKm(lat1, lon1, lat2, lon2) * 1000;
+}
+
 function toRad(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }

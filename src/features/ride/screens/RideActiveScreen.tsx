@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -6,9 +6,9 @@ import * as Haptics from 'expo-haptics';
 import { PrimaryButton } from '@shared/components/PrimaryButton';
 import { GlassCard } from '@shared/components/GlassCard';
 import { Satellite, MapPin, Zap } from 'lucide-react-native';
-import { useRideStore } from '@features/ride/store/rideStore';
-import { useSettingsStore } from '@features/settings/store/settingsStore';
-import { stopLocationTracking } from '@features/ride/services/locationService';
+import { useRideTracking } from '../hooks/useRideTracking';
+import { useRideStore } from '../store/rideStore';
+import { useTimer } from '../hooks/useTimer';
 import { Colors, Typography, Spacing } from '@shared/theme';
 
 function formatDuration(ms: number): string {
@@ -22,32 +22,26 @@ function formatDuration(ms: number): string {
 }
 
 export default function RideActiveScreen() {
-  const { session, status, endRide } = useRideStore();
-  const { prefs } = useSettingsStore();
-  const [elapsed, setElapsed] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { stopRide } = useRideTracking();
+  const { isActive, startTime, distance } = useRideStore();
+  const elapsed = useTimer(startTime);
 
   useEffect(() => {
-    if (status !== 'active' || !session) {
+    if (!isActive || !startTime) {
       router.replace('/(tabs)');
       return;
     }
-    timerRef.current = setInterval(() => {
-      setElapsed(Date.now() - session.startTime);
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [status, session]);
+  }, [isActive, startTime]);
 
   async function handleEndRide() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    stopLocationTracking();
-    endRide(prefs.avgMileage, prefs.fuelPrice);
-    router.replace('/(tabs)/summary');
+    const ride = await stopRide();
+    if (ride) {
+      router.replace('/(modals)/ride-summary');
+    } else {
+      router.replace('/(tabs)');
+    }
   }
-
-  const distanceKm = session?.currentDistance ?? 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,8 +77,8 @@ export default function RideActiveScreen() {
         <GlassCard style={styles.distanceCard}>
           <Text style={styles.metricLabel}>DISTANCE</Text>
           <View style={styles.distanceRow}>
-            <Text style={styles.metricValue}>{distanceKm.toFixed(1)}</Text>
-            <Text style={styles.metricUnit}>{prefs.distanceUnit.toUpperCase()}</Text>
+            <Text style={styles.metricValue}>{(distance / 1000).toFixed(1)}</Text>
+            <Text style={styles.metricUnit}>KM</Text>
           </View>
         </GlassCard>
       </View>
